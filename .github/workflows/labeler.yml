@@ -28,12 +28,17 @@ jobs:
               repo: context.repo.repo,
               labels: ["needs-review"]
             })
-            github.rest.issues.removeLabel({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: ["in-progress"]
-            })
+            try {
+              github.rest.issues.removeLabel({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: ["in-progress"]
+              })
+            } catch(err) {
+              if !(err.name === "HttpError" && err.status === 404) {
+                throw new err
+            }
   draft:
     if: github.event.pull_request.draft
     runs-on: ubuntu-latest
