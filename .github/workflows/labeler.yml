@@ -28,6 +28,12 @@ jobs:
               repo: context.repo.repo,
               labels: ["needs-review"]
             })
+            github.rest.issues.removeLabel({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: ["in-progress"]
+            })
   draft:
     if: github.event.pull_request.draft
     runs-on: ubuntu-latest
@@ -41,6 +47,12 @@ jobs:
               repo: context.repo.repo,
               labels: ["in-progress"]
             })
+            github.rest.issues.removeLabel({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: ["needs-review"]
+            })
   approved:
     if: github.event.review.state == 'approved'
     runs-on: ubuntu-latest
@@ -53,4 +65,10 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               labels: ["ready-to-merge"]
+            })
+            github.rest.issues.removeLabel({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: ["needs-review"]
             })
