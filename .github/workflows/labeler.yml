@@ -3,7 +3,9 @@ permissions:
   pull-requests: write
 on:
   pull_request:
-    types: [opened, reopened]
+    types: [opened, reopened, converted_to_draft, ready_for_review]
+  pull_request_review:
+    types: [submitted]
 jobs:
   debug:
     runs-on: ubuntu-latest
@@ -14,7 +16,7 @@ jobs:
             console.log(github.event)
             console.log(context)
   opened:
-    if: github.event.pull_request.ready_for_review == true
+    if: github.event.pull_request.state == "open" && !github.event.pull_request.draft
     runs-on: ubuntu-latest
     steps:
       - uses: actions/github-script@v6
@@ -25,4 +27,30 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               labels: ["needs-review"]
+            })
+  draft:
+    if: github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ["in-progress"]
+            })
+  approved:
+    if: github.event.review.state == 'approved'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ["ready-to-merge"]
             })
