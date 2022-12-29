@@ -36,7 +36,9 @@ jobs:
                 name: ["in-progress"]
               })
             } catch(err) {
+              console.log(err)
               if (!(err.name === "HttpError" && err.status === 404)) {
+                console.log("404")
                 throw new err
               }
             }
