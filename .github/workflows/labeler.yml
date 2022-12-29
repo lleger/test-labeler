@@ -36,8 +36,9 @@ jobs:
                 name: ["in-progress"]
               })
             } catch(err) {
-              if !(err.name === "HttpError" && err.status === 404) {
+              if (!(err.name === "HttpError" && err.status === 404)) {
                 throw new err
+              }
             }
   draft:
     if: github.event.pull_request.draft
