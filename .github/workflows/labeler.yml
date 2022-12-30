@@ -88,4 +88,4 @@ jobs:
         with:
           script: |
             console.log(context.issue)
-            console.log(github.rest.pulls.get({...context.issue, pull_number: context.issue.number}))
+            console.log(await github.rest.pulls.get({...context.issue, pull_number: context.issue.number}))
