@@ -3,7 +3,7 @@ permissions:
   pull-requests: write
 on:
   pull_request:
-    types: [opened, reopened, converted_to_draft, ready_for_review, labeled]
+    types: [opened, reopened, converted_to_draft, ready_for_review, labeled, unlabeled]
   pull_request_review:
     types: [submitted]
 jobs:
@@ -16,7 +16,7 @@ jobs:
             console.log(github.event)
             console.log(context)
   opened:
-    if: github.event.pull_request.state == 'open' && !github.event.pull_request.draft
+    if: (github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'ready_for_review') && github.event.pull_request.state == 'open' && !github.event.pull_request.draft
     runs-on: ubuntu-latest
     steps:
       - uses: actions/github-script@v6
@@ -43,7 +43,7 @@ jobs:
               }
             }
   draft:
-    if: github.event.pull_request.draft
+    if: (github.event.action == 'opened' || github.event.action == 'converted_to_draft') && github.event.pull_request.draft
     runs-on: ubuntu-latest
     steps:
       - uses: actions/github-script@v6
@@ -62,7 +62,7 @@ jobs:
               name: ["needs-review"]
             })
   approved:
-    if: github.event.review.state == 'approved'
+    if: github.event.action == 'submitted' && github.event.review.state == 'approved'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/github-script@v6
@@ -80,3 +80,11 @@ jobs:
               repo: context.repo.repo,
               name: ["needs-review"]
             })
+  ready:
+    if: github.event.action == 'labeled' || github.event.action == 'unlabeled'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            console.log(context.issue)
